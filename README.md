@@ -43,6 +43,6 @@ The code utilizes popular Python libraries such as NumPy, scikit-learn, pandas, 
 
 ---
 
-This updated section takes into account that Google Colab provides a pre-installed environment for many popular libraries, and users only need to install additional dependencies listed in the `requirements.txt` file.
+Takes into account that Google Colab provides a pre-installed environment for many popular libraries, and you only need to install additional dependencies listed in the `requirements.txt` file.
 
 ---
