@@ -1,7 +1,7 @@
 # Feature Selection Genetic Algorithm and Classification
 
 
-This repository contains Python code for feature selection using a genetic algorithm and various classification algorithms applied to a breast cancer dataset. The dataset is loaded from a CSV file using pandas, and preprocessing steps include handling missing values and label encoding.
+This repository contains Python code for feature selection using a genetic algorithm and various classification algorithms applied to the well-known WDBC dataset (Wisconsin Diagnosis Breast Cancer dataset). The dataset is loaded from a CSV file using pandas, and preprocessing steps include handling missing values and label encoding.
 
 ## Feature Selection with Genetic Algorithm
 
@@ -30,7 +30,7 @@ The code utilizes popular Python libraries such as NumPy, scikit-learn, pandas, 
    - Install the required libraries in requirements.txt file
 
 3. **Run the Code**
-   - Copy the provided code into separate cells in your Colab notebook.
+   - Copy the provided code into separate cell (or cells) in your Colab notebook.
 
 4. **Adjust Parameters (Optional)**
    - You can customize parameters such as population size, generations, crossover probability, and mutation probability to suit your preferences.
