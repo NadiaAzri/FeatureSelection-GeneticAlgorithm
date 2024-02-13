@@ -35,20 +35,19 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 # Loading  the data
-# Use to load data on Google Colab
+# Used to load data on Google Colab
 uploaded = files.upload()
 
-# Use to load data on Google Colab
 df = pd.read_csv('data.csv')
 df = df.dropna(axis=1)
 X = df.iloc[:, 2:31].values
 y = df.iloc[:, 1].values
 
 
-# Split the data into training and testing sets
+# We need to split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Transform "M" and "B" labels to 0 and 1
+# Transforming "M" and "B" labels to 0 and 1
 label_encoder = LabelEncoder()
 y_train = label_encoder.fit_transform(y_train)
 y_test = label_encoder.transform(y_test)
@@ -58,10 +57,10 @@ sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
-# Create a classifier to be used in the feature selection process
+# Creating a classifier to be used in the feature selection process
 classifier = SVC(kernel='linear')
 
-# Define the fitness function
+# and then defining the fitness function
 def evaluate_fitness(individual):
     selected_features = [bool(bit) for bit in individual]
     X_train_selected = X_train[:, selected_features]
@@ -71,32 +70,32 @@ def evaluate_fitness(individual):
     accuracy = accuracy_score(y_test, y_pred)
     return accuracy,
 
-# Define the individual and population
+# Defining the individual and population
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
-# Initialize the toolbox
+# Initializing the toolbox
 toolbox = base.Toolbox()
 toolbox.register("attribute", random.randint, 0, 1)
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attribute, n=len(X[0]))
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-# Define the genetic operators
+# Defining the genetic operators
 toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evaluate_fitness)
 
-# Set the parameters for the genetic algorithm
+# Seting the parameters for the genetic algorithm
 population_size = 50
 generations = 40
 cxpb = 0.5
 mutpb = 0.2
 
-# Create the initial population
+# Creating the initial population
 population = toolbox.population(n=population_size)
 
-# Run the genetic algorithm
+# Runing the genetic algorithm
 best_individual = None
 best_fitness = float("-inf")
 for gen in range(generations):
@@ -109,48 +108,36 @@ for gen in range(generations):
             best_fitness = fitness[0]
     population = toolbox.select(offspring, k=len(population))
 
-# Get the selected features from the best individual
+# We need to get the selected features from the best individual
 selected_features = [bool(bit) for bit in best_individual]
 
-# Select the corresponding features from the training and testing sets
+# now select the corresponding features from the training and testing sets
 X_train_selected = X_train[:, selected_features]
 X_test_selected = X_test[:, selected_features]
 
-# Convert to pandas DataFrame
+# Converting to pandas DataFrame
 X_train_df = pd.DataFrame(X_train)
 print('Type: ', type(X_train_df))
 print('Type: ', type(X_train))
 
-# Train SVM classifier on the transformed data
+# Training SVM classifier on the transformed data
 clf = svm.SVC(kernel = 'rbf', random_state = 0)
 clf.fit(X_train_selected, y_train)
 
-# Predict the class labels on the testing set
+# Predicting the class labels on the testing set
 y_pred = clf.predict(X_test_selected)
 
 # Using the RandomForestClassifier method of ensemble class to use Random Forest Classification algorithm
 clf_RF = RandomForestClassifier(n_estimators = 10, criterion = 'entropy', random_state = 0)
 clf_RF.fit(X_train_selected, y_train)
 
-# Predict the class labels on the testing set
+# Predicting the class labels on the testing set
 y_pred_RF = clf_RF.predict(X_test_selected)
-
-#Using Logistic Regression
-log = LogisticRegression(random_state = 0)
-log.fit(X_train_selected, y_train)
-# Predict the class labels on the testing set
-y_pred_LR = log.predict(X_test_selected)
-
-#Using KNeighborsClassifier
-knn = KNeighborsClassifier(n_neighbors = 5, metric = 'minkowski', p = 2)
-knn.fit(X_train_selected, y_train)
-# Predict the class labels on the testing set
-y_pred_KNN = knn.predict(X_test_selected)
 
 #Using DecisionTreeClassifier
 tree = DecisionTreeClassifier(criterion = 'entropy', random_state = 0)
 tree.fit(X_train_selected, y_train)
-# Predict the class labels on the testing set
+# Predicting the class labels on the testing set
 y_pred_DT = tree.predict(X_test_selected)
 
 n_components = 2
@@ -163,38 +150,25 @@ model.add(Dense(64, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(1, activation='sigmoid'))
 
-# Compile the model
+# Compiling the model
 model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
 
-# Train the ANN model
+# Training the ANN model
 model.fit(X_train, y_train, epochs=100, batch_size=10, verbose=0)
 
-# Evaluate the ANN model
+# Evaluating the ANN model
 ann_predictions = (model.predict(X_test) > 0.5).astype(int).flatten()
 
-# Perform majority voting
-voting_predictions = np.column_stack((ann_predictions, y_pred, y_pred_RF, y_pred_LR, y_pred_KNN, y_pred_DT))
-voting_predictions_int = np.vectorize(int)(voting_predictions)
-final_predictions = np.apply_along_axis(lambda x: np.argmax(np.bincount(x)), axis=1, arr=voting_predictions_int)
-
-# Calculate the accuracy of the majority voting
-accuracy_MV = accuracy_score(y_test, final_predictions)
-
-# Calculate the accuracy of the classifier
+# Calculating the accuracy of the classifier
 accuracy = accuracy_score(y_test, y_pred)
 accuracy_RF = accuracy_score(y_test, y_pred_RF)
-accuracy_LR = accuracy_score(y_test, y_pred_LR)
-accuracy_KNN = accuracy_score(y_test, y_pred_KNN)
 accuracy_DT = accuracy_score(y_test, y_pred_DT)
 accuracy_ANN = accuracy_score(y_test, ann_predictions)
 
 print("Accuracy SVM:", accuracy)
 print("Accuracy RF:", accuracy_RF)
-print("Accuracy LR:", accuracy_LR)
-print("Accuracy KNN:", accuracy_KNN)
 print("Accuracy DT:", accuracy_DT)
 print("Accuracy ANN:", accuracy_ANN)
-print("Accuracy Majority Voting:", accuracy_MV)
 
 cm = confusion_matrix(y_test, ann_predictions)
 
@@ -207,33 +181,23 @@ print(cm)
 print('Testing Accuracy = "{}!"'.format((TP + TN) / (TP + TN + FN + FP)))
 print()
 
-# Build the MLP classifier
+# We need to Build the MLP classifier
 mlp_classifier = MLPClassifier(hidden_layer_sizes=(64, 64), activation='relu', solver='adam', max_iter=100, random_state=0)
 mlp_classifier.fit(X_train, y_train)
 mlp_predictions = mlp_classifier.predict(X_test)
 
-# Calculate recall and precision for MLP
+# And then calculate recall and precision for MLP
 mlp_recall, mlp_precision, _, _ = precision_recall_fscore_support(y_test, mlp_predictions, average='binary')
 
-# Print recall and precision for MLP
+# Printing recall and precision for MLP
 print("Recall MLP:", mlp_recall)
 print("Precision MLP:", mlp_precision)
 
-# Calculate recall and precision for other classifiers using classification_report
+# Calculating recall and precision for other classifiers using classification_report
 print("\nClassification Report SVM:\n", classification_report(y_test, y_pred, digits=4))
 print("Classification Report RF:\n", classification_report(y_test, y_pred_RF, digits=4))
-print("Classification Report LR:\n", classification_report(y_test, y_pred_LR, digits=4))
-print("Classification Report KNN:\n", classification_report(y_test, y_pred_KNN, digits=4))
 print("Classification Report DT:\n", classification_report(y_test, y_pred_DT, digits=4))
 print("Classification Report ANN:\n", classification_report(y_test, ann_predictions, digits=4))
 print("Classification Report MLP:\n", classification_report(y_test, mlp_predictions, digits=4))
 
-# Perform majority voting
-voting_predictions = np.column_stack((y_pred, y_pred_RF, mlp_predictions))
-voting_predictions_int = np.vectorize(int)(voting_predictions)
-final_predictions = np.apply_along_axis(lambda x: np.argmax(np.bincount(x)), axis=1, arr=voting_predictions_int)
-
-# Calculate the accuracy of the majority voting
-accuracy_MV = accuracy_score(y_test, final_predictions)
-print("Accuracy Majority Voting:", accuracy_MV)
 
