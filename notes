@@ -1,7 +1,0 @@
-!pip install pycfs
-
-!pip install mlxtend==0.17.0
-
-!pip install mlxtend
-
-!pip install deap
