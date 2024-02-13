@@ -24,6 +24,7 @@ import random
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder
+from google.colab import files
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
@@ -35,7 +36,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 # Loading  the data
 # Use to load data on Google Colab
-# uploaded = files.upload()
+uploaded = files.upload()
 
 # Use to load data on Google Colab
 df = pd.read_csv('data.csv')
